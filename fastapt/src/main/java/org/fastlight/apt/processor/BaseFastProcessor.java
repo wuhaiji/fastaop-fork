@@ -18,6 +18,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.*;
 import javax.tools.Diagnostic;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,43 +35,44 @@ public abstract class BaseFastProcessor<T extends Annotation> {
      * 编译时输出日志
      */
     public Messager messager;
-
+    
     /**
      * 提取处理元素的语法树
      */
     public JavacTrees javacTrees;
-
+    
     /**
      * 语法树处理工具，能够快速生成语法树节点
      */
     public TreeMaker treeMaker;
-
+    
     /**
      * 用于构建一些标识符，treeMaker 会用到
      */
     public Names names;
-
+    
     /**
      * 处理的全局上下文，可存储一些标志位
      */
     public Context context;
-
+    
     /**
      * 可以用来输出文件等等
      */
     public ProcessingEnvironment environment;
-
+    
     /**
      * 子类继承的泛型
      */
     protected Class<T> atClass;
-
+    
     /**
      * 初始化，注入所需要的所有元素
      *
      * @param environment 所需要的元素都是通过 env 生成的
      */
     public synchronized void init(ProcessingEnvironment environment) {
+        environment = jbUnwrap(ProcessingEnvironment.class, environment);
         if (!(environment instanceof JavacProcessingEnvironment)) {
             return;
         }
@@ -82,14 +84,29 @@ public abstract class BaseFastProcessor<T extends Annotation> {
         this.javacTrees = JavacTrees.instance(environment);
         this.atClass = (Class<T>) ReflectUtils.getGenericTypes(getClass())[0];
     }
-
+    
+    
+    /**
+     * 这个方法是兼容intellij idea的运行环境
+     */
+    private static <T> T jbUnwrap(Class<? extends T> iface, T wrapper) {
+        T unwrapped = null;
+        try {
+            final Class<?> apiWrappers = wrapper.getClass()
+                    .getClassLoader().loadClass("org.jetbrains.jps.javac.APIWrappers");
+            final Method unwrapMethod = apiWrappers.getDeclaredMethod("unwrap", Class.class, Object.class);
+            unwrapped = iface.cast(unwrapMethod.invoke(null, iface, wrapper));
+        } catch (Throwable ignored) {
+        }
+        return unwrapped != null ? unwrapped : wrapper;
+    }
     /**
      * env round 处理完毕回调，一般可用于注解处理完成统一生成文件等功能
      */
     public void processOver() {
-
+    
     }
-
+    
     /**
      * 注解处理入口，这里仅处理 Method 和 Class，要处理其他的元素请 Override
      *
@@ -120,7 +137,7 @@ public abstract class BaseFastProcessor<T extends Annotation> {
             }
         }
     }
-
+    
     /**
      * 方法，构造函数，初始化语句都会进行到这里进行处理
      *
@@ -128,7 +145,7 @@ public abstract class BaseFastProcessor<T extends Annotation> {
      * @param atm               注解元素
      */
     public abstract void processExecutableElement(ExecutableElement executableElement, AnnotationMirror atm);
-
+    
     /**
      * 处理标注在类/接口上面的元素
      *
@@ -136,7 +153,7 @@ public abstract class BaseFastProcessor<T extends Annotation> {
      * @param atm         注解元素
      */
     public abstract void processTypeElement(TypeElement typeElement, AnnotationMirror atm);
-
+    
     /**
      * 处理 TypeElement 下面的 ExecutableElement，支持递归，常用语仅对 Method 进行改造，不对 Field 改造
      *
@@ -159,7 +176,7 @@ public abstract class BaseFastProcessor<T extends Annotation> {
             }
         }
     }
-
+    
     /**
      * 获取 element 上面的注解信息，注解的类型是 atClass
      *
@@ -170,7 +187,7 @@ public abstract class BaseFastProcessor<T extends Annotation> {
     public AnnotationMirror getAtMirror(Element element, Class<? extends Annotation> atClass) {
         return MoreElements.getAnnotationMirror(element, atClass).orNull();
     }
-
+    
     /**
      * 获取当前处理器支持的注解，优先走 {@link SupportedAnnotationTypes}，然后走继承的注解泛型
      */
@@ -184,7 +201,7 @@ public abstract class BaseFastProcessor<T extends Annotation> {
         }
         return Sets.newHashSet(atClass.getName());
     }
-
+    
     /**
      * 获取父元素，即包装它的元素，这里仅仅做了强转的判空
      */
@@ -201,7 +218,7 @@ public abstract class BaseFastProcessor<T extends Annotation> {
         }
         return null;
     }
-
+    
     /**
      * 获取注解元素的某个属性的值
      *
@@ -217,7 +234,7 @@ public abstract class BaseFastProcessor<T extends Annotation> {
         AnnotationValue atv = AnnotationMirrors.getAnnotationValue(atm, field);
         return (M) Optional.ofNullable(atv).map(AnnotationValue::getValue).orElse(null);
     }
-
+    
     /**
      * 打印 error 信息，同时终止编译
      *
@@ -226,5 +243,5 @@ public abstract class BaseFastProcessor<T extends Annotation> {
     protected void logError(String message) {
         messager.printMessage(Diagnostic.Kind.ERROR, message);
     }
-
+    
 }

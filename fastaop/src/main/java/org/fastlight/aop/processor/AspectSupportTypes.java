@@ -15,15 +15,19 @@ import org.fastlight.aop.annotation.FastAspect;
  * 用户可以自由添加注解到 supports.txt 里面实现切面注入
  *
  * @author ychost
- * @date 2021-04-07
+ * @since 2021-04-07
  **/
 public class AspectSupportTypes {
     private static final String TYPES_FILE = "META-INF/aspect/fast.aspect.supports.txt";
-
+    
+    /**
+     * 这里也可以通过用户在自定义注解上添加元注解 @FastAspect 表明是一个自定义 aop 注解，
+     * 然后FastAspectProcessor会把这个注解类名加入这个Set
+     */
     private static Set<String> SUPPORT_TYPES = null;
-
+    
     private static final Object SUPPORT_LOCKER = new Object();
-
+    
     public static Set<String> getSupportTypes() {
         if (SUPPORT_TYPES != null) {
             return SUPPORT_TYPES;
@@ -41,7 +45,7 @@ public class AspectSupportTypes {
                 while (urls.hasMoreElements()) {
                     URL url = urls.nextElement();
                     try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(url.openStream(), Charsets.UTF_8))) {
+                            new InputStreamReader(url.openStream(), Charsets.UTF_8))) {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             String aspect = line.split("#")[0].trim();

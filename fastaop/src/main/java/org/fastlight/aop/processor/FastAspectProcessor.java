@@ -30,9 +30,9 @@ public class FastAspectProcessor extends BaseFastProcessor<FastNone> {
     public Set<String> getSupportedAnnotationTypes() {
         return Sets.newHashSet("*");
     }
-
+    
     /**
-     * 随机算一个支持植入代码的注解
+     * 随机取一个支持植入代码的注解，因为一个方法可能有多个注解支持切入
      */
     AnnotationMirror getSupportAtm(Element element) {
         List<? extends AnnotationMirror> atms = element.getAnnotationMirrors();
@@ -41,8 +41,23 @@ public class FastAspectProcessor extends BaseFastProcessor<FastNone> {
         }
         Set<String> supportTypes = AspectSupportTypes.getSupportTypes();
         for (AnnotationMirror atm : atms) {
+            List<? extends AnnotationMirror> metaAtms = atm.getAnnotationType().asElement().getAnnotationMirrors();
+            
+            // 如果这个注解是提前在配置spi文件中配置的就表示这个元素会被 fastaop 支持切入
             if (supportTypes.contains(atm.getAnnotationType().toString())) {
                 return atm;
+            }
+            
+            // 或者如果这个注解上的元注解包含@FastAspect表示这个元素会被 fastaop 支持切入
+            for (AnnotationMirror metaAtm : metaAtms) {
+                if (supportTypes.contains(metaAtm.getAnnotationType().toString())) {
+                    // 加入受支持的注解类型列表中。
+                    // 这里不太优雅，这里强依赖 FastAspectProcessor 先于 FastAspectVarProcessor 执行，
+                    // 否则先执行 FastAspectVarProcessor会出现异常
+                    // 好处是可以不用写spi文件（META-INF/aspect/fast.aspect.supports.txt）了
+                    supportTypes.add(atm.getAnnotationType().toString());
+                    return atm;
+                }
             }
         }
         return null;
