@@ -32,7 +32,7 @@ import org.fastlight.apt.translator.BaseFastTranslator;
 public class FastAspectTranslator extends BaseFastTranslator {
     
     public static final String FAST_VAR_PREFIX = "__fast_";
-    public static final String CONTEXT_VAR =  FAST_VAR_PREFIX + "context";
+    public static final String CONTEXT_VAR = FAST_VAR_PREFIX + "context";
     public static final String META_METHOD_VAR = FAST_VAR_PREFIX + "meta_method";
     
     /**
@@ -84,10 +84,12 @@ public class FastAspectTranslator extends BaseFastTranslator {
         ListBuffer<JCStatement> ctxStatements = new ListBuffer<>();
         ctxStatements.add(ctxVar);
         ctxStatements.add(invokeAopStatement());
-        changeMethodDefine(jcMethodDecl, statements -> {
-                               ctxStatements.addAll(statements);
-                               return ctxStatements.toList();
-                           }
+        changeMethodDefine(
+                jcMethodDecl,
+                statements -> {
+                    ctxStatements.addAll(statements);
+                    return ctxStatements.toList();
+                }
         );
     }
     
