@@ -17,7 +17,7 @@ import org.fastlight.apt.annotation.FastMarkedMethod;
  */
 public class MetaMethod {
     /**
-     * 是否继续调用下一个切面，MetaMethod 是全局的，所以不存在内存泄漏
+     * 是否继续调用下一个切面，MetaMethod 是全局的，所以不存在内存泄漏, 这里的变量是成员变量属于线程
      */
     private final ThreadLocal<InvokeMethodType> invokeMethodType = ThreadLocal.withInitial(() -> InvokeMethodType.AOP);
 
