@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.fastlight</groupId>
-    <artifactId>fastaop-fork</artifactId>
+    <artifactId>fastaop-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.3-SNAPSHOT</version>
     <modules>
@@ -17,7 +17,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <fast.version>1.0.2-SNAPSHOT</fast.version>
+        <fast.version>${project.version}</fast.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <name>fastaop-parent</name>
@@ -77,30 +77,30 @@
 
     <repositories>
         <repository>
-            <id>nexus-mine</id>
-            <name>nexus-mine</name>
-            <url>http://127.0.0.1:8081/repository/maven-public/</url>
+            <id>moseeker-snapshots</id>
+            <url>https://maven.moseeker.com/repository/maven-public/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
+        </repository>
+        <repository>
+            <id>moseeker-releases</id>
+            <url>https://maven.moseeker.com/repository/maven-public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
     <!--    仓库配置-->
     <distributionManagement>
-        <repository>
-            <id>nexus-mine</id>
-            <name>Nexus Releases</name>
-            <url>http://127.0.0.1:8081/repository/maven-releases/</url>
-        </repository>
         <snapshotRepository>
-            <id>nexus-mine</id>
-            <name>Nexus Snapshot</name>
-            <url>http://127.0.0.1:8081/repository/maven-snapshots/</url>
+            <id>moseeker-snapshots</id>
+            <url>https://maven.moseeker.com/repository/moseeker-snapshots/</url>
         </snapshotRepository>
-
+        <repository>
+            <id>moseeker-releases</id>
+            <url>https://maven.moseeker.com/repository/moseeker-releases/</url>
+        </repository>
     </distributionManagement>
     <build>
         <resources>
