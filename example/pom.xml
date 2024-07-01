@@ -6,7 +6,6 @@
         <artifactId>fastaop-parent</artifactId>
         <version>1.0.3-SNAPSHOT</version>
         <groupId>org.fastlight</groupId>
-        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
